@@ -1,0 +1,30 @@
+import { NextResponse } from "next/server";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { dataDir } from "@/lib/store";
+import { smtpConfigured } from "@/lib/mailer";
+import { adminConfigured } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  const dir = dataDir();
+  let dataWritable = false;
+  try {
+    await fs.mkdir(dir, { recursive: true });
+    const probe = path.join(dir, ".health");
+    await fs.writeFile(probe, String(Date.now()));
+    await fs.unlink(probe);
+    dataWritable = true;
+  } catch {}
+  return NextResponse.json({
+    status: dataWritable ? "ok" : "degraded",
+    checks: {
+      DATA_DIR_writable: dataWritable,
+      DATA_DIR_custom: Boolean(process.env.DATA_DIR),
+      SMTP_configured: smtpConfigured(),
+      ADMIN_configured: adminConfigured(),
+      SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || null,
+    },
+  });
+}

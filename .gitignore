@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# secrets & runtime data
+.env
+.env.local
+.env.*.local
+/data/
+/deploy/
+
+npm-debug.log*
+.DS_Store
+Thumbs.db
